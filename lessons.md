@@ -38,3 +38,17 @@ Incidents de déploiement réels. Mis à jour après chaque résolution.
 - **Cause :** Le hook `deploy` dans `.platform.app.yaml` avait une erreur PHP mais Platform.sh ne la remontait pas clairement
 - **Correct :** Ajouter `set -e` au début du hook deploy + consulter les logs d'activité Platform.sh
 - **Prévention :** `set -e` dans tous les hooks. Tester avec `platform activity:get ACTIVITY_ID --log`
+
+### 2026-05-16 — trusted_host_patterns manquant — erreur 400 en production
+
+- **Symptôme :** Site retourne 400 Bad Request pour toutes les requêtes après le déploiement sur le nouveau domaine
+- **Cause :** `trusted_host_patterns` dans `settings.php` ne contient pas le nouveau domaine
+- **Correct :** Ajouter `$settings['trusted_host_patterns'] = ['^mon-nouveau-site\.com$'];` dans le settings de prod
+- **Prévention :** Checklist de déploiement : mettre à jour `trusted_host_patterns` AVANT le switch DNS
+
+### 2026-05-16 — Rollback impossible — pas de backup avant déploiement
+
+- **Symptôme :** Déploiement cassé, pas de moyen de revenir en arrière sans perte de données
+- **Cause :** Pas de dump DB avant le déploiement — `drush updb` a modifié des tables de façon irréversible
+- **Correct :** Restaurer depuis le backup quotidien automatisé (si configuré)
+- **Prévention :** `drush sql:dump --gzip` TOUJOURS avant `drush deploy` en production. Script atomique avec backup.
